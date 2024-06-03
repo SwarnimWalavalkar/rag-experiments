@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`User Service > create user 1`] = `
+{
+  "email": "test@test.com",
+  "name": "Test User",
+  "password": "passwordHash",
+  "roles": [
+    "user",
+  ],
+  "username": "testUsername",
+}
+`;

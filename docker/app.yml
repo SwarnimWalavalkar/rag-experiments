@@ -1,0 +1,28 @@
+version: "3.9"
+
+name: "rag-service"
+services:
+  app:
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+    build: ..
+    restart: always
+    ports:
+      - 4001:${PORT}
+    environment:
+      VERSION: ${VERSION}
+      PORT: ${PORT}
+      DOMAIN: ${DOMAIN}
+      DB_HOST: postgres
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_TOKEN_SECRET: ${JWT_TOKEN_SECRET}

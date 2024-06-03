@@ -14,6 +14,7 @@ import { CreateFAISSVectorStore } from "../vector/faiss";
 import logger from "../../../utils/logger";
 import config from "../../../config";
 import withCache from "../../../utils/withCache";
+import { tokenize } from "../../../utils/tokenize";
 
 type AIRequestPreferences = {
   model?: ChatModel | "gpt-4o"; //  <- "gpt-4o" is not updated the in openai sdk yet
@@ -103,6 +104,10 @@ export const openAIRequest = async (
         vectorStore.setVector(embeddedQuery, query);
       }
     }
+
+    query = tokenize(query)
+      .splice(0, config.openai.chatCompletions.rateLimitTPM - 100)
+      .join("");
 
     const messages = constructMessages(query, systemPrompt);
 

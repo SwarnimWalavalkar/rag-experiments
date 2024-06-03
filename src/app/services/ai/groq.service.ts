@@ -7,6 +7,7 @@ import {
   ChatCompletion,
   ChatCompletionCreateParams,
 } from "openai/resources/index.mjs";
+import { tokenize } from "../../../utils/tokenize";
 
 type GroqModel =
   | "llama3-8b-8192"
@@ -26,20 +27,6 @@ const groqChatCompletionsRequest = constructNetworkRequester(
   { Authorization: `Bearer ${config.groq.apiKey}` }
 );
 
-/**
- * Converts the given text into an array of tokens
- *
- * A token is presumed to be a chunk of 4 characters.
- *
- * @TODO This is incredibly naive and should be improved.
- *
- * @param text - The text to be tokenized.
- * @returns An array of strings representing the tokens.
- */
-const tokenize = (text: string): Array<string> => {
-  return text.match(/.{1,4}/g) as Array<string>;
-};
-
 export const summarizeWebpageContent = async (
   content: string,
   {
@@ -48,7 +35,7 @@ export const summarizeWebpageContent = async (
 ): Promise<Result<string, GroqServiceError>> => {
   try {
     content = tokenize(content)
-      ?.splice(0, config.groq.rateLimitTPM - 100)
+      .splice(0, config.groq.rateLimitTPM - 100)
       .join("");
 
     const { data: response } = await groqChatCompletionsRequest.post<

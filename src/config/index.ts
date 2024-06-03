@@ -30,6 +30,7 @@ export default {
     chatCompletions: {
       model: (process.env.OPENAI_CHAT_COMPLETIONS_MODEL ??
         "gpt-4-turbo") as ChatModel,
+      rateLimitTPM: Number(process.env.OPENAI_RATE_LIMIT_TPM ?? 30000),
     },
   },
   groq: {

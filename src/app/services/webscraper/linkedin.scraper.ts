@@ -1,9 +1,11 @@
-import { WebpageScrapeError, removeUnwantedTagsFromPage } from ".";
+import { WebpageScrapeError } from ".";
 import { browser } from "../../../dependencies/browser";
-import { Ok, Result } from "../../../shared/result";
+import { Err, Ok, Result } from "../../../shared/result";
 import logger from "../../../utils/logger";
 import sleep from "../../../utils/sleep";
+import { removeUnwantedTagsFromPage } from "./utils";
 
+/**@TODO This does not work very well most of the time... */
 export const linkedinScraper = async (
   url: string
 ): Promise<Result<string, WebpageScrapeError>> => {
@@ -18,9 +20,29 @@ export const linkedinScraper = async (
 
     await page.screenshot({ path: "linkedin.png" });
 
-    await page.click(
-      "#public_profile_contextual-sign-in > div > section > button"
-    );
+    let maxAttempts = 5;
+    let attempts = 0;
+    while (attempts < maxAttempts) {
+      try {
+        await page.waitForSelector(
+          "#public_profile_contextual-sign-in > div > section > button",
+          { timeout: 5000 }
+        );
+        await page.click(
+          "#public_profile_contextual-sign-in > div > section > button"
+        );
+        break;
+      } catch (error) {
+        attempts++;
+        if (attempts === maxAttempts) {
+          return Err(new WebpageScrapeError("Unable to scrape linkedin page"));
+        }
+
+        await page.reload();
+
+        await sleep(2000);
+      }
+    }
 
     await removeUnwantedTagsFromPage(page);
 

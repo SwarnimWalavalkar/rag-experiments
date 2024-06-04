@@ -11,41 +11,32 @@ export class WebpageScrapeError extends ServiceError {
   }
 }
 
-export const removeUnwantedTagsFromPage = async (page: any) => {
-  await page.evaluate(() => {
-    const unwantedTags = [
-      "script",
-      "style",
-      "img",
-      "video",
-      "audio",
-      "source",
-      "track",
-      "iframe",
-      "object",
-      "embed",
-      "picture",
-    ];
-    unwantedTags.forEach((tag) => {
-      const elements = document.getElementsByTagName(tag);
-      for (const element of elements) {
-        if (element && element.parentNode)
-          element.parentNode.removeChild(element);
-      }
-    });
-  });
-};
+const SCRAPER_HOSTNAMES = { LINKEDIN: "linkedin.com" } as const;
+
+type ScraperHostnames =
+  (typeof SCRAPER_HOSTNAMES)[keyof typeof SCRAPER_HOSTNAMES];
+
+const hostnameToCrawlerMap = new Map<
+  ScraperHostnames,
+  (url: string) => Promise<Result<string, WebpageScrapeError>>
+>([[SCRAPER_HOSTNAMES.LINKEDIN, linkedinScraper]]);
 
 export const scrapeWebpage = async (
   url: string
 ): Promise<Result<string, WebpageScrapeError>> => {
   try {
-    switch (true) {
-      case url.includes("linkedin.com"):
-        return await linkedinScraper(url);
-      default:
-        return await genericScraper(url);
+    const parsedURL = new URL(url);
+
+    let hostname = parsedURL.hostname;
+
+    if (hostname.split(".").length > 1) {
+      hostname = hostname.split(".").slice(-2).join(".");
     }
+
+    const scraperFunc =
+      hostnameToCrawlerMap.get(hostname as ScraperHostnames) ?? genericScraper;
+
+    return await scraperFunc(url);
   } catch (error) {
     logger.error(error, `[Web Scraper Service] Error scraping webpage`);
     throw error;

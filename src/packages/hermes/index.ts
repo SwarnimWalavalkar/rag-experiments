@@ -108,7 +108,10 @@ export function Hermes({
     await redisService.disconnect();
   }
 
-  async function* getStreamMessageGenerator(streamName: string, count: number) {
+  async function* getStreamMessageGenerator(
+    streamName: string,
+    count: number
+  ): AsyncGenerator<Array<string | string[]>> {
     let fetchNewMessages = true;
     while (isAlive) {
       const results = fetchNewMessages
@@ -139,7 +142,7 @@ export function Hermes({
       }
 
       for (const message of results) {
-        yield message;
+        yield message as unknown as Array<string | string[]>;
       }
     }
   }
@@ -203,13 +206,13 @@ export function Hermes({
                 },
               });
             } catch (_error) {
-              console.error(
-                `[HERMES] ${topic}:${msgId} Callback Error... Retrying...`
-              );
+              console.error(`[HERMES] ${topic}:${msgId} Callback Error...`);
 
               const retryCount = Number(redisMessage.retryCount);
 
               if (retryCount < maxRetries) {
+                console.log("[HERMES] Retrying message...");
+
                 const retryTime =
                   Date.now() + 1000 * Math.pow(2, retryCount + 1);
 
@@ -353,7 +356,7 @@ export function Hermes({
 
         if (message[0] && message[1] && message[1][1]) {
           const data: Maybe<ResponseType> = JSON.parse(message[1][1]);
-          const msgId = message[0];
+          const msgId = message[0] as string;
 
           let parsedData: ResponseType;
 

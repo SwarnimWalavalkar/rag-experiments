@@ -1,7 +1,8 @@
-import { WebpageScrapeError, removeUnwantedTagsFromPage } from ".";
+import { WebpageScrapeError } from ".";
 import { browser } from "../../../dependencies/browser";
 import { Ok, Result } from "../../../shared/result";
 import logger from "../../../utils/logger";
+import { removeUnwantedTagsFromPage } from "./utils";
 
 export const genericScraper = async (
   url: string

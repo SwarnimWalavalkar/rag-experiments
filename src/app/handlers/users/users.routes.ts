@@ -9,7 +9,7 @@ export default function routes(
   done: (err?: Error | undefined) => void
 ) {
   app.get("/find", findUserController);
-  app.post("/:usernameOrUUID/ingest_webpage", ingestWebsiteController);
+  app.post("/:usernameOrUUID/ingest_webpages", ingestWebsiteController);
 
   done();
 }

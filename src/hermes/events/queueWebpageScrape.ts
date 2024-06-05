@@ -16,7 +16,9 @@ const messagePayloadSchema = z.object({
 export let queueWebpageScrape: IEvent<z.infer<typeof messagePayloadSchema>>;
 
 hermes
-  .registerEvent("webpage-scrape-queue", messagePayloadSchema)
+  .registerEvent("webpage-scrape-queue", messagePayloadSchema, {
+    maxRetries: 3,
+  })
   .then((event) => {
     queueWebpageScrape = event;
   });
@@ -53,7 +55,7 @@ export function registerWebpageScrapeQueueHandler() {
       throw summarizedContent.error;
     }
 
-    logger.info("SUMMARIZATION_OK")
+    logger.info("SUMMARIZATION_OK");
 
     const summaryEmbedding = await openAIEmbedText(summarizedContent.value);
 

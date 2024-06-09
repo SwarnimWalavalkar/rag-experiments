@@ -1,4 +1,4 @@
-import { Hermes } from "../packages/hermes";
+import { Hermes } from "@swarnim/hermes";
 import config from "../config";
 
 const hermes = Hermes({

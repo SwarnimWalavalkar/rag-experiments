@@ -35,7 +35,7 @@ export const summarizeWebpageContent = async (
 ): Promise<Result<string, GroqServiceError>> => {
   try {
     content = tokenize(content)
-      .splice(0, config.groq.rateLimitTPM - 100)
+      .splice(0, config.groq.rateLimitTPM - 500)
       .join("");
 
     const { data: response } = await groqChatCompletionsRequest.post<

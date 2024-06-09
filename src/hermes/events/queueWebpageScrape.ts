@@ -5,7 +5,7 @@ import { summarizeWebpageContent } from "../../app/services/ai/groq.service";
 import { HTMLToMarkdown } from "../../app/services/webscraper/webpageToMarkdown";
 import { createUserEmbedding } from "../../app/services/user_embeddings/user_embeddings.service";
 import logger from "../../utils/logger";
-import { IEvent } from "../../packages/hermes";
+import { IEvent } from "@swarnim/hermes";
 import { openAIEmbedText } from "../../app/services/ai/openai.embeddings.service";
 
 const messagePayloadSchema = z.object({
@@ -15,13 +15,21 @@ const messagePayloadSchema = z.object({
 
 export let queueWebpageScrape: IEvent<z.infer<typeof messagePayloadSchema>>;
 
-hermes
-  .registerEvent("webpage-scrape-queue", messagePayloadSchema, {
-    maxRetries: 3,
-  })
-  .then((event) => {
-    queueWebpageScrape = event;
-  });
+async function initializeQueueWebpageScrape() {
+  try {
+    queueWebpageScrape = await hermes.registerEvent(
+      "webpage-scrape-queue",
+      messagePayloadSchema,
+      {
+        maxRetries: 3,
+      }
+    );
+  } catch (error) {
+    logger.error(`Failed to register event: ${error}`);
+  }
+}
+
+initializeQueueWebpageScrape();
 
 export function registerWebpageScrapeQueueHandler() {
   queueWebpageScrape.subscribe(async ({ data, msg }) => {

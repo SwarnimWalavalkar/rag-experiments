@@ -7,6 +7,8 @@ import { createUserEmbedding } from "../../app/services/user_embeddings/user_emb
 import logger from "../../utils/logger";
 import { IEvent } from "@swarnim/hermes";
 import { openAIEmbedText } from "../../app/services/ai/openai.embeddings.service";
+import { generatePropositions } from "../../app/services/ai/propositions.service";
+import { writeFile } from "fs/promises";
 
 const messagePayloadSchema = z.object({
   url: z.string(),
@@ -54,37 +56,51 @@ export function registerWebpageScrapeQueueHandler() {
 
     logger.info("HTML_TO_MD_OK");
 
-    const summarizedContent = await summarizeWebpageContent(
-      HTMLToMarkdownResult.value,
-      { model: "mixtral-8x7b-32768" }
+    await writeFile("content.md", HTMLToMarkdownResult.value);
+
+    const propositions = await generatePropositions(HTMLToMarkdownResult.value);
+    if (!propositions.ok) {
+      throw propositions.error;
+    }
+
+    logger.info("PROPOSITIONS_OK");
+
+    await writeFile(
+      "propositions.json",
+      JSON.stringify(propositions.value, null, 2)
     );
 
-    if (!summarizedContent.ok) {
-      throw summarizedContent.error;
-    }
+    // const summarizedContent = await summarizeWebpageContent(
+    //   HTMLToMarkdownResult.value,
+    //   { model: "mixtral-8x7b-32768" }
+    // );
 
-    logger.info("SUMMARIZATION_OK");
+    // if (!summarizedContent.ok) {
+    //   throw summarizedContent.error;
+    // }
 
-    const summaryEmbedding = await openAIEmbedText(summarizedContent.value);
+    // logger.info("SUMMARIZATION_OK");
 
-    if (!summaryEmbedding.ok) {
-      throw summaryEmbedding.error;
-    }
+    // const summaryEmbedding = await openAIEmbedText(summarizedContent.value);
 
-    logger.info("SUMMARY_EMBEDDINGS_OK");
+    // if (!summaryEmbedding.ok) {
+    //   throw summaryEmbedding.error;
+    // }
 
-    const embeddingWriteResult = await createUserEmbedding({
-      user_id: data.user_id,
-      embedding: summaryEmbedding.value,
-      content: summarizedContent.value,
-      url: data.url,
-    });
+    // logger.info("SUMMARY_EMBEDDINGS_OK");
 
-    if (!embeddingWriteResult.ok) {
-      throw embeddingWriteResult.error;
-    }
+    // const embeddingWriteResult = await createUserEmbedding({
+    //   user_id: data.user_id,
+    //   embedding: summaryEmbedding.value,
+    //   content: summarizedContent.value,
+    //   url: data.url,
+    // });
 
-    logger.info(`===SUCCESSFULLY INGESTED WEBPAGE===`);
+    // if (!embeddingWriteResult.ok) {
+    //   throw embeddingWriteResult.error;
+    // }
+
+    // logger.info(`===SUCCESSFULLY INGESTED WEBPAGE===`);
 
     await msg.ack();
   });

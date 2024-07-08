@@ -17,7 +17,7 @@ import withCache from "../../../utils/withCache";
 import { tokenize } from "../../../utils/tokenize";
 
 type AIRequestPreferences = {
-  model?: ChatModel | "gpt-4o"; //  <- "gpt-4o" is not updated the in openai sdk yet
+  model?: ChatModel
   skipCache?: boolean;
   systemPrompt?: string;
 };

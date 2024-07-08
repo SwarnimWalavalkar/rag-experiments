@@ -32,6 +32,8 @@ export default {
         "gpt-4-turbo") as ChatModel,
       rateLimitTPM: Number(process.env.OPENAI_RATE_LIMIT_TPM ?? 30000),
     },
+    propositionsModelID:
+      process.env.OPENAI_PROPOSITIONS_MODEL_ID ?? "openai:gpt-3.5-turbo",
   },
   groq: {
     rateLimitTPM: Number(process.env.GROQ_RATE_LIMIT_TPM ?? 5000),
@@ -42,12 +44,31 @@ export default {
       process.env.GROQ_MODEL_CONTEXT_WINDOW ?? 32_768
     ),
   },
+  anthropic: {
+    propositionsModelID:
+      process.env.ANTHROPIC_PROPOSITIONS_MODEL_ID ??
+      "anthropic:claude-3-5-sonnet-20240620",
+    apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  },
+  together: {
+    baseURL: process.env.TOGETHER_BASE_URL ?? "https://api.together.xyz/v1",
+    apiKey: process.env.TOGETHER_API_KEY ?? "",
+    propositionsModelID:
+      process.env.TOGETHER_PROPOSITIONS_MODEL_ID ??
+      "together:mistralai/Mixtral-8x7B-Instruct-v0.1",
+  },
   transformerJs: {
     embeddings: {
       model: process.env.TRANSFORMERS_JS_EMBEDDINGS_MODEL ?? "Xenova/bge-m3",
       dimension: Number(
         process.env.TRANSFORMERS_JS_EMBEDDINGS_DIMENSION ?? 1024
       ),
+    },
+  },
+  ai: {
+    propositions: {
+      defaultModelID:
+        process.env.DEFAULT_PROPOSITIONS_MODEL_ID ?? "openai:gpt-3.5-turbo",
     },
   },
   chromium: {
